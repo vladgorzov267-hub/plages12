@@ -1,0 +1,138 @@
+<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Номерний кейс</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#f3f4f6;--cd:#fff;--tx:#111827;--mu:#6b7280;--ac:#2563eb;--bd:#e5e7eb}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1115;--cd:#1a1d24;--tx:#f3f4f6;--mu:#9ca3af;--bd:#2b2f38}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px system-ui,sans-serif;max-width:560px;margin:auto;padding:10px}
+header{display:flex;gap:8px;align-items:center;justify-content:space-between}
+input,select{background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px 8px;font:inherit}input{width:140px}
+#co{font-weight:700;font-size:18px}
+nav{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}nav button{flex:1;padding:8px 4px;font-size:12px}
+button{background:var(--cd);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;font:inherit;cursor:pointer}
+button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cs{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px}.cs span{font-size:30px}.cs small,.mu{color:var(--mu)}
+.res{min-height:120px;margin:12px 0;padding:12px;background:var(--cd);border:1px solid var(--bd);border-radius:12px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.card .pl{font-size:12px}.card .mn span{font-size:15px;letter-spacing:1px}.card em{font-size:11px}
+.lb{font-size:12px;font-weight:700;text-align:center}.bt{display:flex;gap:4px}.bt button{flex:1;padding:5px 2px;font-size:12px}
+.row{display:flex;gap:10px;align-items:center;padding:10px;background:var(--cd);border:1px solid var(--bd);border-radius:10px;margin-bottom:6px}.row span{flex:1}.row.me{border-color:var(--ac)}
+.pl{display:flex;align-items:stretch;background:#fff;color:#111;border:3px solid #111;border-radius:8px;overflow:hidden;font-family:"Arial Black",Impact,sans-serif;box-shadow:0 0 0 3px var(--rc,#999),0 0 12px var(--rc,#999)}
+.pl i{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1d4ed8;color:#fff;font-style:normal;padding:2px 5px;font-size:11px}
+.mn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 8px;white-space:nowrap}
+.mn span{font-size:26px;letter-spacing:2px}.mn u{font-size:10px;text-decoration:none;color:#444}
+.pl em{font-style:normal;border-left:2px solid #111;padding:2px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:17px}.pl em small{font-size:10px}
+#md{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:14px;z-index:5}#md[hidden],#ts[hidden]{display:none}
+.mc{background:var(--bg);border-radius:14px;padding:12px;max-height:80%;overflow:auto;width:100%;max-width:520px}
+#ts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:8px 14px;border-radius:20px;z-index:9}
+.sec{width:100%;margin-top:4px}
+</style></head><body>
+<header><input id="nm" maxlength="16" onchange="S.name=this.value.slice(0,16);save()"><span id="co"></span></header>
+<nav><button data-t="case" onclick="go('case')">🎁 Кейси</button><button data-t="col" onclick="go('col')">🗂 Колекція</button><button data-t="dice" onclick="go('dice')">🎲 Кості</button><button data-t="trade" onclick="go('trade')">🔄 Обміни</button><button data-t="top" onclick="go('top')">🏆 Рейтинг</button><button data-t="adm" id="ab" hidden onclick="go('adm')">🛠</button></nav>
+<main id="main"></main><div id="md" hidden></div><div id="ts" hidden></div>
+<script>
+/* ===== НАЛАШТУВАННЯ ===== */
+const SB_URL='https://rmywgkhwonixcwlzwdfr.supabase.co';            // https://xxxx.supabase.co  (порожньо = гра без спільних функцій)
+const SB_KEY='sb_publishable_qx97xvF-2fCcQ5OIeAZDDg_8Ocz4LSH';            // anon public key з Supabase
+const ADMIN_IDS=[];
+const ADMIN_NAMES=['f1vla'];         // твій Telegram ID, наприклад [123456789]
+/* ======================== */
+const tg=window.Telegram&&Telegram.WebApp,tu=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
+try{tg&&(tg.ready(),tg.expand())}catch(e){}
+const $=s=>document.querySelector(s),rnd=n=>Math.random()*n|0,pick=s=>s[rnd(s.length)],rl=(s,n)=>Array.from({length:n},()=>pick(s)).join(''),E=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const C={RU:['🇷🇺','Росія'],UA:['🇺🇦','Україна'],US:['🇺🇸','США'],AE:['🇦🇪','ОАЕ'],KZ:['🇰🇿','Казахстан'],BY:['🇧🇾','Білорусія']};
+const RN=['Звичайний','Незвичайний','Рідкісний','Епічний','Легендарний','Міфічний'],RC=['#9ca3af','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444'];
+const RG=[[5,20],[21,60],[70,250],[300,1200],[1500,8000],[10000,50000]],TP=[50,120,500,2000];
+const OD=[[78,44.25,9.8,1.5],[17,30,20,8],[4,20,40,25],[.8,5,25,40],[.18,.7,5,25],[.02,.05,.2,.5]];
+const RU='\u0410\u0412\u0415\u041a\u041c\u041d\u041e\u0420\u0421\u0422\u0423\u0425',SIG='\u0410777\u041c\u0420';
+const LT={RU,UA:'ABCEHIKMOPTX',KZ:'ABCEHKMOPTXY',BY:'ABCEHIKMOPTX',US:'ABCDEFGHJKLMNPRSTUVWXYZ',AE:'ABCDEFGHKLMNPRSTUVWXYZ'};
+const DEF={RU:'77',KZ:'01',BY:'-7',US:'California',AE:'Dubai',UA:''};
+const on=!!(SB_URL&&SB_KEY);
+let uid=tu?'tg'+tu.id:(localStorage.getItem('uid')||(localStorage.setItem('uid','l'+Date.now().toString(36)+rnd(1e4)),localStorage.getItem('uid')));
+const own=tu?(ADMIN_IDS.includes(tu.id)||ADMIN_NAMES.includes((tu.username||'').toLowerCase())):!tg;
+let S={name:tu?tu.first_name:'Гравець'+rnd(100),coins:1000,inv:[],bonus:0},tab='case',busy=0,mn=0;
+const sb=async(p,o={})=>{const r=await fetch(SB_URL+'/rest/v1/'+p,{...o,headers:{apikey:SB_KEY,...(SB_KEY.startsWith('eyJ')?{Authorization:'Bearer '+SB_KEY}:{}),'Content-Type':'application/json',...(o.headers||{})}});if(!r.ok)throw new Error(r.status);const t=await r.text();return t?JSON.parse(t):null};
+const hs=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h};
+const isSig=p=>(p.c=='RU'&&p.a==SIG&&p.b=='777')||(p.c=='UA'&&p.a=='BB 8888 BB');
+function val(p){const g=RG[p.r];if(!g)return 0;if(isSig(p))return 50000*(p.c=='AE'?10:1);const st=p.r>=4?50:p.r>=2?5:1;let v=Math.max(g[0],Math.round((g[0]+hs(p.c+p.a+p.b)%(g[1]-g[0]+1))/st)*st);return p.c=='AE'?v*10:v}
+const score=()=>S.inv.reduce((s,p)=>s+val(p),0),hdr=()=>$('#co').textContent=S.coins+' 🪙';
+const toast=t=>{const e=$('#ts');e.textContent=t;e.hidden=0;setTimeout(()=>e.hidden=1,2000)};
+const roll=k=>{let v=Math.random()*100;for(let i=0;i<6;i++)if((v-=OD[i][k])<0)return i;return 0};
+function dg(n,r){const s='0123456789';
+ if(r==1){const a=rnd(10),b=rnd(10);return(''+a+b+a+b).slice(0,n)}
+ if(r==2){const k=rnd(10-n+1),q=s.slice(k,k+n);return rnd(2)?q:[...q].reverse().join('')}
+ if(r==3)return pick('7891').repeat(n);if(r==4)return pick('07891').repeat(n);if(r==5)return'0'.repeat(n-1)+'1';
+ return String(rnd(10**n)).padStart(n,'0')}
+function mk(c,r){const L=LT[c],x=pick(L),sm=r>=4,sig=r==5&&!rnd(5);let a,b=DEF[c];
+ if(c=='RU'){a=x+dg(3,r)+(sm?x+x:rl(L,2));b=r>=3?pick(['77','97','99','777']):pick(['78','50','16','52','02','63','54','24','61','26']);if(sig){a=SIG;b='777'}}
+ if(c=='UA'){const f=rl(L,2);a=sig?'BB 8888 BB':f+' '+dg(4,r)+' '+(sm?f:rl(L,2))}
+ if(c=='KZ'){a=dg(3,r)+' '+(sm?x+x+x:rl(L,3));b=r>=3?'01':pick(['02','05','07','09','12','15'])}
+ if(c=='BY'){a=dg(4,r)+' '+(sm?x+x:rl(L,2));b='-'+(r>=3?'7':1+rnd(7))}
+ if(c=='US'){a=r==5?pick(['1','7','V8','X','GOD']):r==4?pick(['KING','GOAT','BOSS','1ST','WOLF']):rnd(10)+rl(L,3)+dg(3,r);b=pick(['California','Texas','Florida','New York','Nevada'])}
+ if(c=='AE'){b=pick(['Dubai','Abu Dhabi','Sharjah','Ajman']);a=r==5?pick(['1','7','11','99','5','77']):(b=='Abu Dhabi'?''+(1+rnd(9)):x)+' '+dg(4,r)}
+ return{id:Date.now().toString(36)+rl('abcdefghij',4),c,a,b,r}}
+function plate(p){if(!p||!C[p.c]||!(p.r>=0&&p.r<6))return'';const f=C[p.c][0],top=p.c=='US'||p.c=='AE';
+ return`<div class="pl" style="--rc:${RC[p.r]}">${top?'':`<i>${f}<b>${p.c}</b></i>`}<div class="mn">${top?`<u>${E(p.b)}</u>`:''}<span>${E(p.a)}</span></div>${!top&&p.b?`<em>${E(p.b)}<small>${p.c=='RU'?'RUS ':''}${f}</small></em>`:''}</div>`}
+async function save(){try{localStorage.setItem('np_'+uid,JSON.stringify(S))}catch(e){}
+ if(on)try{await sb('players',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:uid,name:S.name,n:S.inv.length,score:score(),state:S})})}catch(e){}}
+async function load(){try{const l=JSON.parse(localStorage.getItem('np_'+uid)||'null');if(l&&Array.isArray(l.inv))S={...S,...l}}catch(e){}
+ if(on)try{const r=await sb('players?id=eq.'+encodeURIComponent(uid)+'&select=state');if(r&&r[0]&&r[0].state&&Array.isArray(r[0].state.inv))S={...S,...r[0].state}}catch(e){}}
+function go(t){tab=t;render()}
+async function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));const m=$('#main');
+ if(tab=='case')m.innerHTML=`<div class="g" style="grid-template-columns:repeat(4,1fr);margin-bottom:8px">${['Звичайне','Рідкісне','Епічне','Легендарне'].map((n,i)=>`<button class="${mn==i?'on':''}" style="padding:6px 2px;font-size:12px" onclick="mn=${i};render()">${n}<br><small>${TP[i]}</small></button>`).join('')}</div><div class="g">${Object.keys(C).map(c=>`<button class="cs" onclick="openC('${c}')"><span>${C[c][0]}</span>${C[c][1]}<small>${TP[mn]*(c=='AE'?10:1)} 🪙</small></button>`).join('')}</div><div id="res" class="res mu">Обери країну, щоб відкрити кейс</div><button class="sec" onclick="bonus()">Бонус +60 🪙 (раз на 5 хв)</button><button class="sec" onclick="orderV()">🧾 Номер на замовлення (×1.5)</button><p class="mu">Шанси: ${OD.map((o,i)=>RN[i]+' '+o[mn]+'%').join(' · ')}. ОАЕ: ціна кейса і вартість номерів ×10.</p>`;
+ else if(tab=='col'){const inv=[...S.inv].sort((a,b)=>b.r-a.r);m.innerHTML=`<p class="mu">${inv.length} номерів · вартість ${score()} 🪙</p><button class="sec" onclick="sellLow()">Продати всі звичайні й незвичайні</button><br><br><div class="g">${inv.map(p=>`<div class="card">${plate(p)}<div class="lb" style="color:${RC[p.r]}">${RN[p.r]} · ${val(p)} 🪙</div><div class="bt"><button onclick="sell('${p.id}')">Продати</button><button onclick="post('${p.id}')">На обмін</button></div></div>`).join('')}</div>`}
+ else if(tab=='trade')await tradeView();else if(tab=='dice')diceView();else if(tab=='adm'&&own)admView();else await topView()}
+async function openC(c){if(busy)return;const pr=TP[mn]*(c=='AE'?10:1);if(S.coins<pr)return toast('Недостатньо монет');busy=1;S.coins-=pr;hdr();let i=0;const r=$('#res');
+ const t=setInterval(()=>{if(++i<11)return r.innerHTML=plate(mk(c,roll(mn)));clearInterval(t);const p=mk(c,roll(mn));S.inv.push(p);busy=0;
+  r.innerHTML=plate(p)+`<b style="color:${RC[p.r]}">${RN[p.r]} · ${val(p)} 🪙</b><button onclick="sell('${p.id}')">Продати</button>`;save()},90)}
+function sell(id){const i=S.inv.findIndex(p=>p.id==id);if(i<0)return;S.coins+=val(S.inv[i]);S.inv.splice(i,1);save();hdr();if(tab=='col')render();else $('#res').innerHTML='Продано'}
+function sellLow(){let s=0;S.inv=S.inv.filter(p=>p.r>1||(s+=val(p),false));S.coins+=s;save();hdr();toast('+'+s+' 🪙');render()}
+function bonus(){const w=3e5-(Date.now()-S.bonus);if(w>0)return toast('Ще '+Math.ceil(w/6e4)+' хв');S.coins+=60;S.bonus=Date.now();save();hdr();toast('+60 🪙')}
+/* ---- номер на замовлення ---- */
+function rate(c,a){const d=a.replace(/\D/g,''),l=[...a.replace(/[\d\s]/g,'')],h=l.length/2,same=l.length>1&&(l.every(x=>x==l[0])||(l.length%2==0&&l.slice(0,h).join('')==l.slice(h).join('')));
+ if(c=='US'&&['KING','GOAT','BOSS','1ST','WOLF'].includes(a))return 4;
+ if(c=='AE'&&d.length&&d.length<=2)return 5;
+ if(/^0+1$/.test(d))return same?5:3;if(/^(\d)\1{2,}$/.test(d))return same?4:3;
+ if(d.length>=3&&('0123456789'.includes(d)||'9876543210'.includes(d)||/^(\d)(\d)\2\1$/.test(d)))return 2;
+ if(d.length>=3&&(/^(\d)(\d)\1\2$/.test(d)||/^(\d)(\d)\1$/.test(d)))return 1;return 0}
+const LA={A:'\u0410',B:'\u0412',E:'\u0415',K:'\u041a',M:'\u041c',H:'\u041d',O:'\u041e',P:'\u0420',C:'\u0421',T:'\u0422',Y:'\u0423',X:'\u0425'},LU={'\u0410':'A','\u0412':'B','\u0415':'E','\u0406':'I','\u041a':'K','\u041c':'M','\u041d':'H','\u041e':'O','\u0420':'P','\u0421':'C','\u0422':'T','\u0425':'X'};
+const OT=()=>$('#ot').value.toUpperCase().replace(/\s+/g,' ').replace(/[^A-Z\u0410-\u042f\u0406\u0407\u04040-9 ]/g,'').trim(),opts=()=>Object.keys(C).map(c=>`<option value="${c}">${C[c][0]} ${C[c][1]}</option>`).join('');
+function mkO(c,t){if(!t)return null;let a=t,b=DEF[c];
+ if(c=='RU'){t=t.replace(/ /g,'').replace(/[A-Z]/g,x=>LA[x]||x);const m=t.match(new RegExp('^(['+RU+'])(\\d{3})(['+RU+']{2})(\\d{2,3})?$'));if(!m)return null;a=m[1]+m[2]+m[3];if(m[4])b=m[4]}
+ else if(c=='UA'){t=t.replace(/ /g,'').replace(/[\u0410-\u042f\u0406]/g,x=>LU[x]||x);const m=t.match(/^([A-Z]{2})(\d{4})([A-Z]{2})$/);if(!m)return null;a=m[1]+' '+m[2]+' '+m[3]}
+ const p={id:Date.now().toString(36)+rl('abcdefghij',4),c,a,b,r:rate(c,a)};if(isSig(p))p.r=5;return p}
+function orderV(){const md=$('#md');md.hidden=0;md.innerHTML=`<div class="mc"><p>Номер на замовлення: ціна ×1.5 від вартості (RU: А777МР777, UA: BB8888BB)</p><select id="oc" onchange="ordP()" style="width:100%">${opts()}</select><br><br><input id="ot" maxlength="10" style="width:100%" oninput="ordP()"><p id="op" class="mu">Введи номер</p><button onclick="orderB()">Купити</button> <button onclick="$('#md').hidden=1">Закрити</button></div>`}
+function ordP(){const t=OT(),p=mkO($('#oc').value,t);$('#op').textContent=!t?'Введи номер':!p?'Формат: А777МР777 або BB8888BB':`${RN[p.r]} · ціна ${Math.ceil(val(p)*1.5)} 🪙`}
+function orderB(){const p=mkO($('#oc').value,OT());if(!p)return toast('Перевір формат номера');const pr=Math.ceil(val(p)*1.5);if(S.coins<pr)return toast('Недостатньо монет');S.coins-=pr;S.inv.push(p);save();hdr();$('#md').hidden=1;toast('Номер у колекції!')}
+/* ---- кості ---- */
+function diceView(){$('#main').innerHTML=`<div class="res"><div id="dc" style="font-size:54px">⚀ ⚃</div><div id="dm" class="mu">Кинь дві кістки. Ставка:</div><input id="bt" type="number" value="50" min="1" style="width:110px;text-align:center"></div><div class="g"><button onclick="dice('lo')">Менше 7 ×2</button><button onclick="dice('hi')">Більше 7 ×2</button></div><button class="sec" onclick="dice('7')">Рівно 7 ×4</button><p class="mu">Шанси: менше або більше — 42%, рівно 7 — 17%. Віртуальні монети.</p>`}
+function dice(k){if(busy)return;const b=Math.floor(+$('#bt').value);if(!(b>0))return toast('Введи ставку');if(b>S.coins)return toast('Недостатньо монет');busy=1;S.coins-=b;hdr();let i=0;const F='⚀⚁⚂⚃⚄⚅',el=$('#dc');
+ const t=setInterval(()=>{if(++i<9)return el.textContent=pick(F)+' '+pick(F);clearInterval(t);const x=1+rnd(6),y=1+rnd(6),s=x+y;el.textContent=F[x-1]+' '+F[y-1];
+  const w=k=='lo'?s<7:k=='hi'?s>7:s==7,m=k=='7'?4:2;if(w)S.coins+=b*m;$('#dm').textContent=`Випало ${s}: `+(w?`виграш +${b*(m-1)} 🪙`:`програш −${b} 🪙`);busy=0;hdr();save()},100)}
+/* ---- обміни (Supabase) ---- */
+const q=s=>encodeURIComponent(s),PA={method:'PATCH',headers:{Prefer:'return=representation'}};
+async function post(id){if(!on)return toast('Обміни потребують Supabase');const i=S.inv.findIndex(p=>p.id==id);if(i<0)return;const p=S.inv.splice(i,1)[0];
+ try{await sb('trades',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({from_id:uid,from_name:S.name,plate:p})})}catch(e){S.inv.push(p);return toast('Не вдалося виставити')}save();go('trade')}
+async function tradeView(){const m=$('#main');if(!on){m.innerHTML='<p class="mu">Обміни та спільний рейтинг потребують Supabase (див. налаштування на початку файлу).</p>';return}m.textContent='Завантаження…';
+ try{const T=await sb('trades?status=in.(open,done)&select=*&order=id.desc&limit=100');let ch=0;
+  for(const t of T)if(t.from_id==uid&&t.status=='done'&&!t.claimed&&t.give){const r=await sb('trades?id=eq.'+t.id+'&claimed=eq.false',{...PA,body:JSON.stringify({claimed:true})});if(r&&r.length){S.inv.push(t.give);ch=1;toast('Обмін завершено!')}}
+  if(ch){save();hdr()}
+  const op=T.filter(t=>t.status=='open');
+  m.innerHTML=`<h3>Відкриті обміни</h3><div class="g">${op.map(t=>`<div class="card">${plate(t.plate)}<div class="lb">${E(t.from_name)}</div>${t.from_id==uid?`<button onclick="cancelT('${t.id}')">Скасувати</button>`:`<button onclick="pickT('${t.id}')">Обміняти</button>`}</div>`).join('')||'<p class="mu">Поки порожньо. Виставляй номери з колекції.</p>'}</div>`
+ }catch(e){m.textContent='Помилка завантаження'}}
+async function cancelT(id){try{const r=await sb('trades?id=eq.'+id+'&from_id=eq.'+q(uid)+'&status=eq.open',{...PA,body:JSON.stringify({status:'cancel'})});if(r&&r.length){S.inv.push(r[0].plate);save()}}catch(e){}render()}
+function pickT(id){const md=$('#md');md.hidden=0;md.innerHTML=`<div class="mc"><p>Обери свій номер для обміну</p><div class="g">${S.inv.map(p=>`<div class="card" onclick="swap('${id}','${p.id}')">${plate(p)}</div>`).join('')||'Немає номерів'}</div><br><button onclick="$('#md').hidden=1">Закрити</button></div>`}
+async function swap(id,pid){$('#md').hidden=1;const i=S.inv.findIndex(p=>p.id==pid);if(i<0)return;const mine=S.inv[i];
+ try{const r=await sb('trades?id=eq.'+id+'&status=eq.open&from_id=neq.'+q(uid),{...PA,body:JSON.stringify({status:'done',give:mine})});
+  if(!r||!r.length)toast('Обмін вже недоступний');else{S.inv.splice(i,1);S.inv.push(r[0].plate);save();toast('Обмін успішний!')}}catch(e){toast('Помилка обміну')}render()}
+async function topView(){const m=$('#main');let rows=[{id:uid,name:S.name,n:S.inv.length,score:score()}];
+ if(on)try{rows=await sb('players?select=id,name,n,score&order=score.desc&limit=20')}catch(e){}
+ m.innerHTML=rows.map((r,i)=>`<div class="row${r.id==uid?' me':''}"><b>${i+1}</b><span>${E(r.name)}</span><small class="mu">${+r.n||0} шт.</small><b>${+r.score||0} 🪙</b></div>`).join('')}
+/* ---- адмін (лише ADMIN_IDS) ---- */
+function admView(){$('#main').innerHTML=`<p class="mu">Панель власника</p><div class="card" style="margin-bottom:8px"><input id="am" type="number" value="10000" style="width:100%"><button onclick="giveC()">💰 Видати / забрати монети</button></div><div class="card" style="margin-bottom:8px"><select id="ac">${opts()}</select><select id="ar">${RN.map((n,i)=>`<option value="${i}">${n}</option>`).join('')}</select><button onclick="giveP()">Видати собі номер</button></div><button class="sec" onclick="resetA()">♻️ Скинути мій акаунт</button>`}
+function giveC(){const n=+$('#am').value;if(n){S.coins=Math.max(0,S.coins+n);save();hdr();toast('Готово')}}
+function giveP(){S.inv.push(mk($('#ac').value,+$('#ar').value));save();toast('Видано')}
+let rs=0;function resetA(){if(!rs){rs=1;setTimeout(()=>rs=0,3000);return toast('Натисни ще раз для підтвердження')}rs=0;S.coins=1000;S.inv=[];save();hdr();toast('Скинуто')}
+(async()=>{await load();$('#nm').value=S.name;$('#ab').hidden=!own;hdr();render();save()})();
+$('#nm').value=S.name;hdr();render();
+</script></body></html>
